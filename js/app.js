@@ -1,11 +1,10 @@
-// ==================== SUPABASE ====================
 const SUPABASE_URL = "https://qwhjvbbwpenhlfwewuup.supabase.co";
 const SUPABASE_KEY = "sb_publishable_cj5g0QQ8d7pgDMNWC87IDQ_Uy0Up1PT";
 
-let supabase = null;
+let supabaseClient = null;
 
 try {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   console.log("Supabase conectado com sucesso");
 } catch (err) {
   console.error("Erro ao conectar Supabase:", err);
