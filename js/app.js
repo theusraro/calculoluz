@@ -2,7 +2,14 @@
 const SUPABASE_URL = "https://qwhjvbbwpenhlfwewuup.supabase.co";
 const SUPABASE_KEY = "sb_publishable_cj5g0QQ8d7pgDMNWC87IDQ_Uy0Up1PT";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase = null;
+
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  console.log("Supabase conectado com sucesso");
+} catch (err) {
+  console.error("Erro ao conectar Supabase:", err);
+}
 
 // ==================== USUÁRIOS DO SISTEMA ====================
 const USUARIOS = {
@@ -33,6 +40,8 @@ document.getElementById("loginForm").addEventListener("submit", function (e) {
 
   const user = document.getElementById("loginUser").value.trim().toLowerCase();
   const pass = document.getElementById("loginPass").value;
+
+  console.log("Tentando login:", user);
 
   if (USUARIOS[user] && USUARIOS[user] === pass) {
     usuarioLogado = user;
@@ -70,6 +79,8 @@ function mostrarApp() {
 // ==================== FUNÇÕES COM SUPABASE ====================
 
 async function carregarTarifa() {
+  if (!supabase) return;
+
   const { data, error } = await supabase
     .from("config")
     .select("tarifa")
@@ -86,6 +97,8 @@ async function carregarTarifa() {
 }
 
 async function salvarTarifa() {
+  if (!supabase) return alert("Supabase não conectado");
+
   const novaTarifa = parseFloat(document.getElementById("tarifa").value) || 1.18002201;
   tarifaAtual = novaTarifa;
 
@@ -103,6 +116,8 @@ async function salvarTarifa() {
 }
 
 async function adicionarPessoa() {
+  if (!supabase) return alert("Supabase não conectado");
+
   const nome = document.getElementById("novaPessoa").value.trim().toUpperCase();
   if (!nome) return alert("Digite o nome da pessoa");
 
@@ -124,6 +139,8 @@ async function adicionarPessoa() {
 }
 
 async function adicionarLeitura(pessoaId, nome) {
+  if (!supabase) return alert("Supabase não conectado");
+
   const mes = prompt("Qual o mês? (exemplo: 7 ou 8)");
   if (!mes) return;
 
@@ -147,6 +164,8 @@ async function adicionarLeitura(pessoaId, nome) {
 }
 
 async function editarLeitura(pessoaId, nome, leituras) {
+  if (!supabase) return alert("Supabase não conectado");
+
   const meses = Object.keys(leituras);
 
   if (meses.length === 0) {
@@ -209,7 +228,14 @@ function calcularConsumo(leituras) {
 async function carregarDados() {
   await carregarTarifa();
 
-  // Buscar pessoas
+  if (!supabase) {
+    document.getElementById("listaPessoas").innerHTML = `
+      <div class="bg-white dark:bg-gray-800 rounded-2xl p-10 text-center text-red-500">
+        Erro: Supabase não conectado. Verifique a chave.
+      </div>`;
+    return;
+  }
+
   const { data: pessoas, error: errorPessoas } = await supabase
     .from("pessoas")
     .select("*")
@@ -217,10 +243,10 @@ async function carregarDados() {
 
   if (errorPessoas) {
     console.error("Erro ao carregar pessoas:", errorPessoas);
+    alert("Erro ao carregar dados: " + errorPessoas.message);
     return;
   }
 
-  // Buscar todas as leituras
   const { data: todasLeituras, error: errorLeituras } = await supabase
     .from("leituras")
     .select("*");
@@ -230,7 +256,6 @@ async function carregarDados() {
     return;
   }
 
-  // Organizar leituras por pessoa
   const leiturasPorPessoa = {};
   (todasLeituras || []).forEach((l) => {
     if (!leiturasPorPessoa[l.pessoa_id]) {
@@ -239,7 +264,6 @@ async function carregarDados() {
     leiturasPorPessoa[l.pessoa_id][l.mes] = parseFloat(l.valor);
   });
 
-  // Renderizar
   const container = document.getElementById("listaPessoas");
   container.innerHTML = "";
 
