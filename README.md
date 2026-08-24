@@ -13,14 +13,7 @@ Sistema simples para controle de consumo de energia elétrica de um loteamento e
 - Modo claro / escuro
 - Total geral do loteamento
 
-## Usuários
 
-| Usuário | Senha     |
-|---------|-----------|
-| cida    | 123571    |
-| theus   | theus2605 |
-
-Ambos têm acesso total ao sistema.
 
 ## Como usar
 
