@@ -138,6 +138,26 @@ async function adicionarPessoa() {
   carregarDados();
 }
 
+async function deletarPessoa(pessoaId, nome) {
+  if (!supabaseClient) return alert("Supabase não conectado");
+
+  const confirmar = confirm(`Tem certeza que deseja deletar "${nome}"?\n\nTodas as leituras dela também serão apagadas.`);
+  if (!confirmar) return;
+
+  const { error } = await supabaseClient
+    .from("pessoas")
+    .delete()
+    .eq("id", pessoaId);
+
+  if (error) {
+    alert("Erro ao deletar: " + error.message);
+    return;
+  }
+
+  alert(`"${nome}" foi removido com sucesso.`);
+  carregarDados();
+}
+
 async function adicionarLeitura(pessoaId, nome) {
   if (!supabaseClient) return alert("Supabase não conectado");
 
@@ -301,6 +321,10 @@ async function carregarDados() {
           <button onclick='editarLeitura("${pessoa.id}", "${pessoa.nome}", ${JSON.stringify(leituras)})'
                   class="bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 text-sm px-3 py-1.5 rounded-lg hover:bg-yellow-200 dark:hover:bg-yellow-900/60 transition">
             ✏ Editar
+          </button>
+          <button onclick="deletarPessoa('${pessoa.id}', '${pessoa.nome}')"
+                  class="bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-sm px-3 py-1.5 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/60 transition">
+            🗑 Deletar
           </button>
         </div>
       </div>
