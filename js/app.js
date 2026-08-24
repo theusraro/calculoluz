@@ -1,3 +1,4 @@
+// ==================== SUPABASE ====================
 const SUPABASE_URL = "https://qwhjvbbwpenhlfwewuup.supabase.co";
 const SUPABASE_KEY = "sb_publishable_cj5g0QQ8d7pgDMNWC87IDQ_Uy0Up1PT";
 
@@ -78,9 +79,9 @@ function mostrarApp() {
 // ==================== FUNÇÕES COM SUPABASE ====================
 
 async function carregarTarifa() {
-  if (!supabase) return;
+  if (!supabaseClient) return;
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("config")
     .select("tarifa")
     .eq("id", 1)
@@ -96,12 +97,12 @@ async function carregarTarifa() {
 }
 
 async function salvarTarifa() {
-  if (!supabase) return alert("Supabase não conectado");
+  if (!supabaseClient) return alert("Supabase não conectado");
 
   const novaTarifa = parseFloat(document.getElementById("tarifa").value) || 1.18002201;
   tarifaAtual = novaTarifa;
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("config")
     .update({ tarifa: novaTarifa, updated_at: new Date().toISOString() })
     .eq("id", 1);
@@ -115,12 +116,12 @@ async function salvarTarifa() {
 }
 
 async function adicionarPessoa() {
-  if (!supabase) return alert("Supabase não conectado");
+  if (!supabaseClient) return alert("Supabase não conectado");
 
   const nome = document.getElementById("novaPessoa").value.trim().toUpperCase();
   if (!nome) return alert("Digite o nome da pessoa");
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("pessoas")
     .insert([{ nome }]);
 
@@ -138,7 +139,7 @@ async function adicionarPessoa() {
 }
 
 async function adicionarLeitura(pessoaId, nome) {
-  if (!supabase) return alert("Supabase não conectado");
+  if (!supabaseClient) return alert("Supabase não conectado");
 
   const mes = prompt("Qual o mês? (exemplo: 7 ou 8)");
   if (!mes) return;
@@ -146,7 +147,7 @@ async function adicionarLeitura(pessoaId, nome) {
   const valor = prompt(`Leitura do Mês ${mes} (em kWh):`);
   if (!valor || isNaN(valor)) return alert("Valor inválido");
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("leituras")
     .upsert([{
       pessoa_id: pessoaId,
@@ -163,7 +164,7 @@ async function adicionarLeitura(pessoaId, nome) {
 }
 
 async function editarLeitura(pessoaId, nome, leituras) {
-  if (!supabase) return alert("Supabase não conectado");
+  if (!supabaseClient) return alert("Supabase não conectado");
 
   const meses = Object.keys(leituras);
 
@@ -183,7 +184,7 @@ async function editarLeitura(pessoaId, nome, leituras) {
 
   if (!novoValor || isNaN(novoValor)) return alert("Valor inválido");
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("leituras")
     .update({ valor: parseFloat(novoValor) })
     .eq("pessoa_id", pessoaId)
@@ -227,7 +228,7 @@ function calcularConsumo(leituras) {
 async function carregarDados() {
   await carregarTarifa();
 
-  if (!supabase) {
+  if (!supabaseClient) {
     document.getElementById("listaPessoas").innerHTML = `
       <div class="bg-white dark:bg-gray-800 rounded-2xl p-10 text-center text-red-500">
         Erro: Supabase não conectado. Verifique a chave.
@@ -235,7 +236,7 @@ async function carregarDados() {
     return;
   }
 
-  const { data: pessoas, error: errorPessoas } = await supabase
+  const { data: pessoas, error: errorPessoas } = await supabaseClient
     .from("pessoas")
     .select("*")
     .order("nome");
@@ -246,7 +247,7 @@ async function carregarDados() {
     return;
   }
 
-  const { data: todasLeituras, error: errorLeituras } = await supabase
+  const { data: todasLeituras, error: errorLeituras } = await supabaseClient
     .from("leituras")
     .select("*");
 
